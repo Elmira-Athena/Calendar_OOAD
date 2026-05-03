@@ -27,7 +27,7 @@ dotnet restore Calendar_OOAD.sln
 ```
 
 ### 2. Cập nhật cơ sở dữ liệu (Database Migration)
-Dự án sử dụng SQLite. Bạn cần chạy lệnh Update Database để tạo các bảng trong cơ sở dữ liệu dựa trên file Migration.
+Dự án sử dụng SQLite. Cần chạy lệnh Update Database để tạo các bảng trong cơ sở dữ liệu dựa trên file Migration.
 Điều hướng vào thư mục API:
 ```bash
 cd src/Calendar.API
@@ -38,7 +38,7 @@ dotnet ef database update --project ../Calendar.Infrastructure
 ```
 
 ### 3. Cấu hình Email (Bắt buộc để gửi thông báo)
-Mở file `src/Calendar.API/appsettings.json`, tìm đến phần `"SmtpSettings"` và thay thế `"SenderEmail"` và `"Password"` bằng tài khoản email và [App Password (Mật khẩu ứng dụng)](https://support.google.com/accounts/answer/185833?hl=vi) của bạn:
+Mở file `src/Calendar.API/appsettings.json`, tìm đến phần `"SmtpSettings"` và thay thế `"SenderEmail"` và `"Password"` bằng tài khoản email và [App Password (Mật khẩu ứng dụng)](https://support.google.com/accounts/answer/185833?hl=vi):
 ```json
   "SmtpSettings": {
     "Server": "smtp.gmail.com",
@@ -50,12 +50,12 @@ Mở file `src/Calendar.API/appsettings.json`, tìm đến phần `"SmtpSettings
 ```
 
 ### 4. Chạy Backend API
-Từ thư mục gốc hoặc thư mục `src/Calendar.API`, bạn chạy Backend API:
+Từ thư mục gốc hoặc thư mục `src/Calendar.API`, chạy Backend API:
 ```bash
 cd src/Calendar.API
 dotnet run
 ```
-Sau khi chạy, API thường sẽ lắng nghe ở cổng `https://localhost:7000` hoặc `http://localhost:5000` (bạn có thể kiểm tra ở terminal).
+Sau khi chạy, API thường sẽ lắng nghe ở cổng `https://localhost:7000` hoặc `http://localhost:5000` (có thể kiểm tra ở terminal).
 *Chú ý: Đảm bảo giữ terminal chạy API để Frontend có thể gọi dữ liệu.*
 
 ### 5. Chạy Frontend Client
@@ -64,8 +64,8 @@ Mở một terminal khác (terminal thứ hai), điều hướng tới thư mụ
 cd src/Calendar.Client
 dotnet run
 ```
-Terminal sẽ hiển thị đường link để bạn truy cập vào ứng dụng trên trình duyệt (thường là `https://localhost:7001` hoặc tương tự). 
-Bạn click vào link để mở và sử dụng hệ thống Lịch.
+Terminal sẽ hiển thị đường link để truy cập vào ứng dụng trên trình duyệt (thường là `https://localhost:7001` hoặc tương tự). 
+Click vào link để mở và sử dụng hệ thống Lịch.
 
 ## Các chức năng chính (Các luồng công việc đã hoàn thiện)
 - Quản lý cuộc hẹn và lịch trình (Appointments/Meetings).
