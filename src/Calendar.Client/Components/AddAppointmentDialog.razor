@@ -1,0 +1,262 @@
+@inject AppointmentService AppointmentService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Model="@request">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="request.Name" For="@(() => request.Name)" Label="Tiêu đề" Required="true" />
+                </MudItem>
+
+                <MudItem xs="8">
+                    <MudDatePicker @bind-Date="startDate" Label="Ngày bắt đầu" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTimePicker @bind-Time="startTime" Label="Giờ" Disabled="@request.IsAllDay" />
+                </MudItem>
+
+                <MudItem xs="8">
+                    <MudDatePicker @bind-Date="endDate" Label="Ngày kết thúc" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTimePicker @bind-Time="endTime" Label="Giờ" Disabled="@request.IsAllDay" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="request.Location" Label="Địa điểm" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="request.Description" Label="Mô tả chi tiết" Lines="3" />
+                </MudItem>
+
+                <MudItem xs="6">
+                    <MudSwitch @bind-Value="request.IsAllDay" Label="Cả ngày" Color="Color.Primary" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudColorPicker @bind-Text="stringColor" Label="Màu sắc" Style="MudBlazor.ColorPickerView.Spectrum" />
+                </MudItem>
+
+                <!-- Group Meeting Toggle -->
+                <MudItem xs="12">
+                    <MudPaper Class="pa-3" Style="@GroupMeetingPaperStyle" Elevation="0">
+                        <div class="d-flex align-center gap-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Groups"
+                                     Style="@($"color: {(request.IsGroupMeeting ? "#7C3AED" : "#999")}; font-size: 28px;")" />
+                            <div class="flex-grow-1">
+                                <MudSwitch @bind-Value="request.IsGroupMeeting"
+                                           Color="Color.Secondary"
+                                           Label="Đây là cuộc họp nhóm"
+                                           LabelPlacement="Placement.End" />
+                                @if (request.IsGroupMeeting)
+                                {
+                                    <MudText Typo="Typo.caption" Style="color: #7C3AED;">
+                                        Cuộc họp sẽ hiển thị trên lịch của tất cả mọi người
+                                    </MudText>
+                                }
+                            </div>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <ReminderEditor Reminders="request.Reminders" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="@(request.IsGroupMeeting ? Color.Secondary : Color.Primary)"
+                   Variant="Variant.Filled" OnClick="SaveAsync" Disabled="@isLoading"
+                   Style="@(request.IsGroupMeeting ? "background: linear-gradient(135deg, #7C3AED, #5B21B6);" : "")">
+            @if (isLoading)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+            }
+            else
+            {
+                <MudText>@(request.IsGroupMeeting ? "Tạo cuộc họp" : "Lưu")</MudText>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public DateTime InitialTime { get; set; }
+
+    CreateAppointmentRequest request = new CreateAppointmentRequest();
+    global::Calendar.Shared.Validators.CreateAppointmentValidator validator = new();
+    MudForm form = null!;
+    bool isLoading = false;
+
+    DateTime? startDate;
+    TimeSpan? startTime;
+    DateTime? endDate;
+    TimeSpan? endTime;
+
+    string stringColor = "#1976d2";
+
+    private string GroupMeetingPaperStyle => request.IsGroupMeeting
+        ? "border: 1px solid #7C3AED40; background: linear-gradient(135deg, #7C3AED08, #5B21B608); border-radius: 8px;"
+        : "border: 1px solid #eee; border-radius: 8px;";
+
+    protected override void OnInitialized()
+    {
+        startDate = InitialTime.Date;
+        startTime = InitialTime.TimeOfDay;
+
+        endDate = InitialTime.Date;
+        endTime = InitialTime.TimeOfDay.Add(TimeSpan.FromHours(1));
+    }
+
+    private void SyncDateTime()
+    {
+        request.Color = request.IsGroupMeeting ? "#7C3AED" : stringColor;
+
+        if (startDate.HasValue && startTime.HasValue)
+            request.StartTime = startDate.Value.Add(startTime.Value);
+        else if (startDate.HasValue && request.IsAllDay)
+            request.StartTime = startDate.Value;
+
+        if (endDate.HasValue && endTime.HasValue)
+            request.EndTime = endDate.Value.Add(endTime.Value);
+        else if (endDate.HasValue && request.IsAllDay)
+            request.EndTime = endDate.Value.AddDays(1).AddSeconds(-1);
+    }
+
+    private async Task SaveAsync()
+    {
+        SyncDateTime();
+        var valResult = validator.Validate(request);
+
+        if (!valResult.IsValid)
+        {
+            foreach (var err in valResult.Errors)
+                Snackbar.Add(err.ErrorMessage, Severity.Error);
+            return;
+        }
+
+        isLoading = true;
+        StateHasChanged();
+
+        // 1. Conflict Check (personal appointments)
+        var conflictRes = await AppointmentService.CheckConflictAsync(request.StartTime, request.EndTime);
+        if (conflictRes.Success && conflictRes.Data!.HasConflict)
+        {
+            isLoading = false;
+            StateHasChanged();
+
+            var parameters = new DialogParameters
+            {
+                ["ConflictingAppointments"] = conflictRes.Data.ConflictingAppointments,
+                ["SuggestedTimes"] = conflictRes.Data.SuggestedTimes
+            };
+            var dialog = await DialogService.ShowAsync<ConflictWarningDialog>("Cảnh báo trùng lịch", parameters);
+            var dialogResult = await dialog.Result;
+
+            if (!dialogResult.Canceled && dialogResult.Data != null)
+            {
+                var resolution = dialogResult.Data as ConflictWarningDialog.ConflictResolution;
+                if (resolution?.Action == "Suggestion" && resolution.SuggestedTime.HasValue)
+                {
+                    var suggestedDate = resolution.SuggestedTime.Value;
+                    startDate = suggestedDate.Date;
+                    startTime = suggestedDate.TimeOfDay;
+                    endDate = startDate;
+                    endTime = startTime.Value.Add(TimeSpan.FromHours(1));
+                    StateHasChanged();
+                    return;
+                }
+                else if (resolution?.Action == "Replace")
+                {
+                    foreach (var conflict in conflictRes.Data.ConflictingAppointments)
+                        await AppointmentService.DeleteAsync(conflict.Id);
+                }
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        // 2. Group Meeting match check (only for personal appointments, not when creating a group meeting)
+        if (!request.IsGroupMeeting && !request.SkipGroupMeetingCheck)
+        {
+            isLoading = true;
+            StateHasChanged();
+
+            var matchRes = await AppointmentService.CheckGroupMeetingMatchAsync(
+                request.Name, request.StartTime, request.EndTime);
+
+            if (matchRes.Success && matchRes.Data!.IsMatch)
+            {
+                isLoading = false;
+                StateHasChanged();
+
+                var matchParams = new DialogParameters { ["Match"] = matchRes.Data };
+                var matchDialog = await DialogService.ShowAsync<GroupMeetingJoinDialog>(
+                    "Tham gia cuộc họp nhóm?", matchParams,
+                    new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true });
+                var matchDialogResult = await matchDialog.Result;
+
+                if (matchDialogResult.Canceled)
+                    return;
+
+                var joinChoice = matchDialogResult.Data is GroupMeetingJoinDialog.JoinDialogResult choice
+                    ? choice
+                    : GroupMeetingJoinDialog.JoinDialogResult.Cancel;
+
+                if (joinChoice == GroupMeetingJoinDialog.JoinDialogResult.Join)
+                {
+                    isLoading = true;
+                    StateHasChanged();
+                    var joinRes = await AppointmentService.JoinMeetingAsync(matchRes.Data.GroupMeetingId!.Value);
+                    isLoading = false;
+                    if (joinRes.Success)
+                        Snackbar.Add("Tham gia cuộc họp nhóm thành công! 🎉", Severity.Success);
+                    else
+                        Snackbar.Add(joinRes.Message, Severity.Error);
+                    MudDialog.Close(DialogResult.Ok(true));
+                    return;
+                }
+                else if (joinChoice == GroupMeetingJoinDialog.JoinDialogResult.CreateSeparate)
+                {
+                    // Fall through to create personal appointment, skip group check
+                    request.SkipGroupMeetingCheck = true;
+                }
+                else
+                {
+                    return; // Cancel
+                }
+            }
+        }
+
+        // 3. Create appointment / group meeting
+        isLoading = true;
+        StateHasChanged();
+
+        var res = await AppointmentService.CreateAsync(request);
+        isLoading = false;
+
+        if (res.Success)
+        {
+            if (res.Data!.IsGroupMeeting)
+                Snackbar.Add("Tạo cuộc họp nhóm thành công! 📅", Severity.Success);
+            else
+                Snackbar.Add("Tạo cuộc hẹn thành công", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(res.Message, Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

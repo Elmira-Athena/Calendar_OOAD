@@ -1,0 +1,112 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject NavigationManager NavigationManager
+@inject global::Calendar.Client.Services.AuthService AuthService
+@inject global::Calendar.Client.Services.AppointmentService AppointmentService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ISnackbar Snackbar
+
+<MudThemeProvider @ref="@_themeProvider" @bind-IsDarkMode="@_isDarkMode" Theme="MyCustomTheme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo="Typo.h5" Class="ml-3">Calendar App</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.Brightness4" Color="Color.Inherit" OnClick="@((e) => ToggleDarkMode())" />
+        
+        <AuthorizeView>
+            <Authorized>
+                <MudButton Color="Color.Inherit" OnClick="Logout">Đăng xuất</MudButton>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Color="Color.Inherit" Href="/login">Đăng nhập</MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="2" ClipMode="DrawerClipMode.Always">
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+    private MudThemeProvider _themeProvider;
+    private System.Threading.Timer? _reminderTimer;
+
+    protected override void OnInitialized()
+    {
+        // Poll for reminders every 30 seconds
+        _reminderTimer = new System.Threading.Timer(async _ => await CheckReminders(), null, 5000, 30000);
+    }
+
+    private async Task CheckReminders()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (!(authState.User.Identity?.IsAuthenticated ?? false)) return;
+
+        var result = await AppointmentService.GetDueRemindersAsync();
+        if (result.Success && result.Data?.Any() == true)
+        {
+            foreach (var reminder in result.Data)
+            {
+                Snackbar.Add($"[NHẮC LỊCH] {reminder.AppointmentName} lúc {reminder.StartTime.ToLocalTime():HH:mm}", 
+                    Severity.Info, config => {
+                        config.Icon = Icons.Material.Filled.Alarm;
+                    });
+            }
+        }
+    }
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void ToggleDarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+    }
+    
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+
+    public void Dispose()
+    {
+        _reminderTimer?.Dispose();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Removed GetSystemPreference to avoid MudBlazor compatibility errors
+        }
+    }
+
+    private MudTheme MyCustomTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = Colors.Blue.Default,
+            Secondary = Colors.Green.Accent4,
+            AppbarBackground = Colors.Blue.Darken2,
+        },
+        PaletteDark = new PaletteDark()
+        {
+            Primary = Colors.Blue.Lighten1,
+        }
+    };
+}

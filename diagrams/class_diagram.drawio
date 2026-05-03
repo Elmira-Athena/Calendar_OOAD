@@ -1,0 +1,362 @@
+<mxfile host="app.diagrams.net" modified="2026-04-04T13:30:00.000Z" type="device">
+  <diagram id="class-diagram" name="Class Diagram - Add Calendar Appointment">
+    <mxGraphModel dx="2200" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1920" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ========== LAYER LABELS ========== -->
+        <!-- Presentation Layer -->
+        <mxCell id="layer_presentation" value="&lt;b&gt;Presentation Layer&lt;/b&gt;&#xa;(Calendar.Client + Calendar.API)" style="shape=mxgraph.basic.rect;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontStyle=1;align=center;verticalAlign=top;spacingTop=8;rounded=1;arcSize=6;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+          <mxGeometry x="-40" y="-60" width="1960" height="400" as="geometry" />
+        </mxCell>
+
+        <!-- Service Layer -->
+        <mxCell id="layer_service" value="&lt;b&gt;Service Layer&lt;/b&gt;&#xa;(Calendar.Service)" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=14;fontStyle=1;align=center;verticalAlign=top;spacingTop=8;rounded=1;arcSize=6;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+          <mxGeometry x="260" y="400" width="1100" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- Domain Layer -->
+        <mxCell id="layer_domain" value="&lt;b&gt;Domain Layer&lt;/b&gt;&#xa;(Calendar.Core)" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=14;fontStyle=1;align=center;verticalAlign=top;spacingTop=8;rounded=1;arcSize=6;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+          <mxGeometry x="-40" y="800" width="1960" height="500" as="geometry" />
+        </mxCell>
+
+        <!-- Infrastructure Layer -->
+        <mxCell id="layer_infra" value="&lt;b&gt;Infrastructure Layer&lt;/b&gt;&#xa;(Calendar.Infrastructure)" style="shape=mxgraph.basic.rect;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;fontSize=14;fontStyle=1;align=center;verticalAlign=top;spacingTop=8;rounded=1;arcSize=6;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+          <mxGeometry x="-40" y="1360" width="1960" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- ========== PRESENTATION LAYER ========== -->
+
+        <!-- AddAppointmentDialog (Blazor Component - UI) -->
+        <mxCell id="c_add_dialog" value="&lt;b&gt;AddAppointmentDialog&lt;/b&gt;&#xa;─────────────────────&#xa;- request: CreateAppointmentRequest&#xa;- validator: CreateAppointmentValidator&#xa;- form: MudForm&#xa;- isLoading: bool&#xa;- startDate: DateTime?&#xa;- startTime: TimeSpan?&#xa;- endDate: DateTime?&#xa;- endTime: TimeSpan?&#xa;─────────────────────&#xa;+ OnInitialized(): void&#xa;- SyncDateTime(): void&#xa;- SaveAsync(): Task&#xa;- Cancel(): void" style="shape=mxgraph.basic.rect;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="280" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- ConflictWarningDialog -->
+        <mxCell id="c_conflict_dialog" value="&lt;b&gt;ConflictWarningDialog&lt;/b&gt;&#xa;─────────────────────&#xa;- ConflictingAppointments: List&lt;AppointmentListResponse&gt;&#xa;- SuggestedTimes: List&lt;DateTime&gt;&#xa;- selectedSuggestion: DateTime&#xa;─────────────────────&#xa;- Cancel(): void&#xa;- SubmitSuggestion(): void&#xa;- Replace(): void" style="shape=mxgraph.basic.rect;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="330" y="0" width="320" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- ConflictResolution (nested class) -->
+        <mxCell id="c_conflict_resolution" value="&lt;b&gt;ConflictResolution&lt;/b&gt;&#xa;─────────────────────&#xa;+ Action: string&#xa;+ SuggestedTime: DateTime?" style="shape=mxgraph.basic.rect;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="370" y="230" width="240" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Client AppointmentService (HTTP Client) -->
+        <mxCell id="c_client_service" value="&lt;b&gt;AppointmentService&lt;/b&gt;&#xa;&lt;i&gt;(Client-side HTTP Service)&lt;/i&gt;&#xa;─────────────────────&#xa;- _httpClient: HttpClient&#xa;─────────────────────&#xa;+ GetByDateRangeAsync(from, to): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ GetByIdAsync(id): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ CreateAsync(request): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ UpdateAsync(id, request): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ DeleteAsync(id): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ CheckConflictAsync(start, end, excludeId?): Task&lt;ApiResult&lt;...&gt;&gt;" style="shape=mxgraph.basic.rect;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="700" y="0" width="370" height="220" as="geometry" />
+        </mxCell>
+
+        <!-- AppointmentsController -->
+        <mxCell id="c_controller" value="&lt;b&gt;AppointmentsController&lt;/b&gt;&#xa;&lt;i&gt;[ApiController, Authorize]&lt;/i&gt;&#xa;─────────────────────&#xa;- _appointmentService: IAppointmentService&#xa;─────────────────────&#xa;- GetUserId(): Guid&#xa;+ GetByDateRange(from, to): Task&lt;IActionResult&gt;&#xa;+ GetById(id): Task&lt;IActionResult&gt;&#xa;+ Create(request): Task&lt;IActionResult&gt;&#xa;+ Update(id, request): Task&lt;IActionResult&gt;&#xa;+ Delete(id): Task&lt;IActionResult&gt;&#xa;+ CheckConflict(start, end, excludeId?): Task&lt;IActionResult&gt;" style="shape=mxgraph.basic.rect;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="0" width="370" height="240" as="geometry" />
+        </mxCell>
+
+        <!-- ExceptionHandlingMiddleware -->
+        <mxCell id="c_middleware" value="&lt;b&gt;ExceptionHandlingMiddleware&lt;/b&gt;&#xa;─────────────────────&#xa;- _next: RequestDelegate&#xa;- _logger: ILogger&#xa;─────────────────────&#xa;+ InvokeAsync(context): Task&#xa;- HandleExceptionAsync(context, ex): Task" style="shape=mxgraph.basic.rect;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="0" width="280" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- ========== SHARED / DTO LAYER (within Presentation band) ========== -->
+
+        <!-- CreateAppointmentRequest -->
+        <mxCell id="c_create_req" value="&lt;b&gt;CreateAppointmentRequest&lt;/b&gt;&#xa;&lt;i&gt;(DTO - Calendar.Shared)&lt;/i&gt;&#xa;─────────────────────&#xa;+ Name: string&#xa;+ Location: string?&#xa;+ StartTime: DateTime&#xa;+ EndTime: DateTime&#xa;+ Description: string?&#xa;+ Color: string?&#xa;+ IsAllDay: bool&#xa;+ GroupMeetingId: Guid?&#xa;+ Reminders: List&lt;ReminderDto&gt;&#xa;+ RecurrenceRule: RecurrenceRuleDto?" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="80" y="500" width="270" height="210" as="geometry" />
+        </mxCell>
+
+        <!-- AppointmentResponse -->
+        <mxCell id="c_appt_response" value="&lt;b&gt;AppointmentResponse&lt;/b&gt;&#xa;&lt;i&gt;(DTO)&lt;/i&gt;&#xa;─────────────────────&#xa;+ Id: Guid&#xa;+ Name: string&#xa;+ Location: string?&#xa;+ StartTime: DateTime&#xa;+ EndTime: DateTime&#xa;+ Description: string?&#xa;+ Color: string?&#xa;+ IsAllDay: bool&#xa;+ GroupMeetingId: Guid?&#xa;+ Reminders: List&lt;ReminderDto&gt;&#xa;+ RecurrenceRule: RecurrenceRuleDto?" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="600" y="500" width="270" height="220" as="geometry" />
+        </mxCell>
+
+        <!-- ConflictCheckResponse -->
+        <mxCell id="c_conflict_resp" value="&lt;b&gt;ConflictCheckResponse&lt;/b&gt;&#xa;&lt;i&gt;(DTO)&lt;/i&gt;&#xa;─────────────────────&#xa;+ HasConflict: bool&#xa;+ ConflictingAppointments: List&lt;AppointmentListResponse&gt;&#xa;+ SuggestedTimes: List&lt;DateTime&gt;" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="920" y="500" width="310" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- CreateAppointmentValidator -->
+        <mxCell id="c_validator" value="&lt;b&gt;CreateAppointmentValidator&lt;/b&gt;&#xa;&lt;i&gt;: AbstractValidator&lt;CreateAppointmentRequest&gt;&lt;/i&gt;&#xa;─────────────────────&#xa;Rules:&#xa;  - Name: NotEmpty&#xa;  - StartTime: NotEmpty&#xa;  - EndTime: NotEmpty&#xa;  - EndTime &gt;= StartTime" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="380" y="500" width="200" height="170" as="geometry" />
+        </mxCell>
+
+        <!-- ApiResult<T> -->
+        <mxCell id="c_api_result" value="&lt;b&gt;ApiResult&lt;T&gt;&lt;/b&gt;&#xa;─────────────────────&#xa;+ Success: bool&#xa;+ Message: string&#xa;+ Data: T?&#xa;─────────────────────&#xa;+ Ok(data, message): ApiResult&lt;T&gt;&#xa;+ Fail(message): ApiResult&lt;T&gt;" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="500" width="230" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- ========== SERVICE LAYER ========== -->
+
+        <!-- IAppointmentService (Interface) -->
+        <mxCell id="c_iappt_svc" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;/b&gt;&#xa;&lt;b&gt;IAppointmentService&lt;/b&gt;&#xa;─────────────────────&#xa;+ CreateAsync(userId, request): Task&lt;ApiResult&lt;AppointmentResponse&gt;&gt;&#xa;+ UpdateAsync(userId, id, request): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ DeleteAsync(userId, id): Task&lt;ApiResult&lt;bool&gt;&gt;&#xa;+ GetByIdAsync(userId, id): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ GetByDateRangeAsync(userId, from, to): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ CheckConflictAsync(userId, start, end, excludeId?): Task&lt;ApiResult&lt;...&gt;&gt;" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="440" width="380" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- AppointmentService (Server-side) -->
+        <mxCell id="c_server_service" value="&lt;b&gt;AppointmentService&lt;/b&gt;&#xa;&lt;i&gt;(Server-side Service)&lt;/i&gt;&#xa;─────────────────────&#xa;- _appointmentRepository: IAppointmentRepository&#xa;- _groupMeetingRepository: IGroupMeetingRepository&#xa;- _recurrenceRuleRepository: IRecurrenceRuleRepository&#xa;─────────────────────&#xa;+ CreateAsync(userId, request): Task&lt;ApiResult&lt;AppointmentResponse&gt;&gt;&#xa;+ UpdateAsync(userId, id, request): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ DeleteAsync(userId, id): Task&lt;ApiResult&lt;bool&gt;&gt;&#xa;+ GetByIdAsync(userId, id): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ GetByDateRangeAsync(userId, from, to): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;+ CheckConflictAsync(userId, start, end, excludeId?): Task&lt;ApiResult&lt;...&gt;&gt;&#xa;- MapToResponse(x): AppointmentResponse" style="shape=mxgraph.basic.rect;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="280" y="660" width="400" height="270" as="geometry" />
+        </mxCell>
+
+        <!-- ========== DOMAIN LAYER (Calendar.Core) ========== -->
+
+        <!-- User Entity -->
+        <mxCell id="c_user" value="&lt;b&gt;User&lt;/b&gt;&#xa;─────────────────────&#xa;+ Id: Guid&#xa;+ Username: string&#xa;+ PasswordHash: string&#xa;+ DisplayName: string?&#xa;+ CreatedDate: DateTime&#xa;+ ModifiedDate: DateTime?&#xa;+ IsDeleted: bool&#xa;─────────────────────&#xa;+ Appointments: ICollection&lt;Appointment&gt;&#xa;+ Participations: ICollection&lt;Participant&gt;" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="0" y="860" width="280" height="220" as="geometry" />
+        </mxCell>
+
+        <!-- Appointment Entity -->
+        <mxCell id="c_appointment" value="&lt;b&gt;Appointment&lt;/b&gt;&#xa;─────────────────────&#xa;+ Id: Guid&#xa;+ UserId: Guid&#xa;+ Name: string&#xa;+ Location: string?&#xa;+ StartTime: DateTime&#xa;+ EndTime: DateTime&#xa;+ Description: string?&#xa;+ Color: string?&#xa;+ IsAllDay: bool&#xa;+ GroupMeetingId: Guid?&#xa;+ RecurrenceRuleId: Guid?&#xa;+ RecurrenceParentId: Guid?&#xa;+ CreatedDate: DateTime&#xa;+ ModifiedDate: DateTime?&#xa;+ IsDeleted: bool&#xa;─────────────────────&#xa;+ User: User&#xa;+ GroupMeeting: GroupMeeting?&#xa;+ RecurrenceRule: RecurrenceRule?&#xa;+ RecurrenceParent: Appointment?&#xa;+ RecurrenceInstances: ICollection&lt;Appointment&gt;&#xa;+ Reminders: ICollection&lt;Reminder&gt;" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="350" y="840" width="300" height="440" as="geometry" />
+        </mxCell>
+
+        <!-- Reminder Entity -->
+        <mxCell id="c_reminder" value="&lt;b&gt;Reminder&lt;/b&gt;&#xa;─────────────────────&#xa;+ Id: Guid&#xa;+ AppointmentId: Guid&#xa;+ MinutesBefore: int&#xa;+ Type: ReminderType&#xa;+ IsTriggered: bool&#xa;─────────────────────&#xa;+ Appointment: Appointment" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="720" y="860" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- GroupMeeting Entity -->
+        <mxCell id="c_group_meeting" value="&lt;b&gt;GroupMeeting&lt;/b&gt;&#xa;─────────────────────&#xa;+ Id: Guid&#xa;+ CreatedByUserId: Guid&#xa;+ MeetingName: string&#xa;+ StartTime: DateTime&#xa;+ EndTime: DateTime&#xa;+ Location: string?&#xa;+ CreatedDate: DateTime&#xa;+ IsDeleted: bool&#xa;─────────────────────&#xa;+ CreatedByUser: User&#xa;+ Participants: ICollection&lt;Participant&gt;&#xa;+ Appointments: ICollection&lt;Appointment&gt;" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="860" width="290" height="260" as="geometry" />
+        </mxCell>
+
+        <!-- Participant Entity -->
+        <mxCell id="c_participant" value="&lt;b&gt;Participant&lt;/b&gt;&#xa;─────────────────────&#xa;+ Id: Guid&#xa;+ GroupMeetingId: Guid&#xa;+ UserId: Guid&#xa;+ JoinedDate: DateTime&#xa;─────────────────────&#xa;+ GroupMeeting: GroupMeeting&#xa;+ User: User" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1380" y="860" width="230" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- RecurrenceRule Entity -->
+        <mxCell id="c_recurrence" value="&lt;b&gt;RecurrenceRule&lt;/b&gt;&#xa;─────────────────────&#xa;+ Id: Guid&#xa;+ Type: RecurrenceType&#xa;+ Interval: int&#xa;+ DayOfWeek: DayOfWeek?&#xa;+ DayOfMonth: int?&#xa;+ MonthOfYear: int?&#xa;+ RecurrenceEndDate: DateTime?&#xa;+ MaxOccurrences: int?&#xa;─────────────────────&#xa;+ Appointments: ICollection&lt;Appointment&gt;" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="720" y="1080" width="280" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- ReminderType Enum -->
+        <mxCell id="c_reminder_type" value="&lt;b&gt;&amp;lt;&amp;lt;enum&amp;gt;&amp;gt;&lt;/b&gt;&#xa;&lt;b&gt;ReminderType&lt;/b&gt;&#xa;─────────────────────&#xa;Notification = 0&#xa;Email = 1" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="1160" width="180" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- RecurrenceType Enum -->
+        <mxCell id="c_recurrence_type" value="&lt;b&gt;&amp;lt;&amp;lt;enum&amp;gt;&amp;gt;&lt;/b&gt;&#xa;&lt;b&gt;RecurrenceType&lt;/b&gt;&#xa;─────────────────────&#xa;None = 0&#xa;Daily = 1&#xa;Weekly = 2&#xa;Monthly = 3&#xa;Yearly = 4" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="1160" width="180" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Exceptions -->
+        <mxCell id="c_conflict_exc" value="&lt;b&gt;AppointmentConflictException&lt;/b&gt;&#xa;&lt;i&gt;: Exception&lt;/i&gt;&#xa;─────────────────────&#xa;+ AppointmentConflictException(message: string)" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="1100" width="310" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c_invalid_exc" value="&lt;b&gt;InvalidAppointmentException&lt;/b&gt;&#xa;&lt;i&gt;: Exception&lt;/i&gt;&#xa;─────────────────────&#xa;+ InvalidAppointmentException(message: string)" style="shape=mxgraph.basic.rect;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="1200" width="310" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ========== INFRASTRUCTURE LAYER ========== -->
+
+        <!-- IAppointmentRepository (Interface - in Domain but shown near Infra) -->
+        <mxCell id="c_iappt_repo" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;/b&gt;&#xa;&lt;b&gt;IAppointmentRepository&lt;/b&gt;&#xa;─────────────────────&#xa;+ GetByIdAsync(id): Task&lt;Appointment?&gt;&#xa;+ GetByDateRangeAsync(userId, from, to): Task&lt;List&lt;Appointment&gt;&gt;&#xa;+ GetConflictingAsync(userId, start, end, excludeId?): Task&lt;List&lt;Appointment&gt;&gt;&#xa;+ GetRecurringParentsAsync(userId): Task&lt;List&lt;Appointment&gt;&gt;&#xa;+ Add(appointment): void&#xa;+ Update(appointment): void&#xa;+ SaveChangesAsync(): Task" style="shape=mxgraph.basic.rect;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="0" y="1400" width="390" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- AppointmentRepository -->
+        <mxCell id="c_appt_repo" value="&lt;b&gt;AppointmentRepository&lt;/b&gt;&#xa;&lt;i&gt;: IAppointmentRepository&lt;/i&gt;&#xa;─────────────────────&#xa;- _context: CalendarDbContext&#xa;─────────────────────&#xa;+ GetByIdAsync(id): Task&lt;Appointment?&gt;&#xa;+ GetByDateRangeAsync(userId, from, to): Task&lt;...&gt;&#xa;+ GetConflictingAsync(userId, start, end, excludeId?): Task&lt;...&gt;&#xa;+ Add(appointment): void&#xa;+ Update(appointment): void&#xa;+ SaveChangesAsync(): Task" style="shape=mxgraph.basic.rect;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="0" y="1620" width="390" height="220" as="geometry" />
+        </mxCell>
+
+        <!-- IGroupMeetingRepository -->
+        <mxCell id="c_igm_repo" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;/b&gt;&#xa;&lt;b&gt;IGroupMeetingRepository&lt;/b&gt;&#xa;─────────────────────&#xa;+ GetByIdAsync(id): Task&lt;GroupMeeting?&gt;&#xa;+ GetAllAsync(): Task&lt;List&lt;GroupMeeting&gt;&gt;&#xa;+ FindMatchingAsync(name, start, end): Task&lt;GroupMeeting?&gt;&#xa;+ HasParticipantAsync(meetingId, userId): Task&lt;bool&gt;&#xa;+ Add(meeting): void&#xa;+ AddParticipant(participant): void&#xa;+ SaveChangesAsync(): Task" style="shape=mxgraph.basic.rect;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="1400" width="380" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- GroupMeetingRepository -->
+        <mxCell id="c_gm_repo" value="&lt;b&gt;GroupMeetingRepository&lt;/b&gt;&#xa;&lt;i&gt;: IGroupMeetingRepository&lt;/i&gt;&#xa;─────────────────────&#xa;- _context: CalendarDbContext&#xa;─────────────────────&#xa;+ GetByIdAsync(id): Task&lt;GroupMeeting?&gt;&#xa;+ FindMatchingAsync(name, start, end): Task&lt;GroupMeeting?&gt;&#xa;+ HasParticipantAsync(meetingId, userId): Task&lt;bool&gt;&#xa;+ AddParticipant(participant): void&#xa;+ SaveChangesAsync(): Task" style="shape=mxgraph.basic.rect;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="430" y="1620" width="380" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- CalendarDbContext -->
+        <mxCell id="c_dbcontext" value="&lt;b&gt;CalendarDbContext&lt;/b&gt;&#xa;&lt;i&gt;: DbContext&lt;/i&gt;&#xa;─────────────────────&#xa;+ Users: DbSet&lt;User&gt;&#xa;+ Appointments: DbSet&lt;Appointment&gt;&#xa;+ RecurrenceRules: DbSet&lt;RecurrenceRule&gt;&#xa;+ Reminders: DbSet&lt;Reminder&gt;&#xa;+ GroupMeetings: DbSet&lt;GroupMeeting&gt;&#xa;+ Participants: DbSet&lt;Participant&gt;&#xa;─────────────────────&#xa;# OnModelCreating(builder): void" style="shape=mxgraph.basic.rect;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;fontSize=11;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;rounded=1;arcSize=4;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="870" y="1420" width="290" height="220" as="geometry" />
+        </mxCell>
+
+        <!-- ========== RELATIONSHIPS ========== -->
+
+        <!-- AddAppointmentDialog -> Client AppointmentService (uses) -->
+        <mxCell id="rel_dialog_clientsvc" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_add_dialog" target="c_client_service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dialog_clientsvc_label" value="&lt;i&gt;«uses»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_dialog_clientsvc">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AddAppointmentDialog -> ConflictWarningDialog (opens) -->
+        <mxCell id="rel_dialog_conflict" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_add_dialog" target="c_conflict_dialog">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dialog_conflict_label" value="&lt;i&gt;«opens»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_dialog_conflict">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AddAppointmentDialog -> CreateAppointmentValidator (uses) -->
+        <mxCell id="rel_dialog_validator" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_add_dialog" target="c_validator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_dialog_validator_label" value="&lt;i&gt;«validates»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_dialog_validator">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- ConflictWarningDialog - ConflictResolution (nested) -->
+        <mxCell id="rel_conflict_resolution" style="endArrow=diamondThin;endFill=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_conflict_resolution" target="c_conflict_dialog">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Client AppointmentService (HTTP) -> AppointmentsController -->
+        <mxCell id="rel_client_controller" style="endArrow=open;endFill=0;dashed=1;strokeColor=#cc0000;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="c_client_service" target="c_controller">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_client_controller_label" value="&lt;b&gt;HTTP REST API&lt;/b&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#cc0000;" vertex="1" connectable="0" parent="rel_client_controller">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AppointmentsController -> IAppointmentService -->
+        <mxCell id="rel_ctrl_isvc" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_controller" target="c_iappt_svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_ctrl_isvc_label" value="&lt;i&gt;«uses»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_ctrl_isvc">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AppointmentService implements IAppointmentService -->
+        <mxCell id="rel_svc_isvc" style="endArrow=block;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_server_service" target="c_iappt_svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_svc_isvc_label" value="&lt;i&gt;«implements»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_svc_isvc">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AppointmentService -> IAppointmentRepository -->
+        <mxCell id="rel_svc_repo" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_server_service" target="c_iappt_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_svc_repo_label" value="&lt;i&gt;«uses»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_svc_repo">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AppointmentService -> IGroupMeetingRepository -->
+        <mxCell id="rel_svc_gmrepo" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_server_service" target="c_igm_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_svc_gmrepo_label" value="&lt;i&gt;«uses»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_svc_gmrepo">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AppointmentRepository implements IAppointmentRepository -->
+        <mxCell id="rel_repo_irepo" style="endArrow=block;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_appt_repo" target="c_iappt_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_repo_irepo_label" value="&lt;i&gt;«implements»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_repo_irepo">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- GroupMeetingRepository implements IGroupMeetingRepository -->
+        <mxCell id="rel_gmrepo_igmrepo" style="endArrow=block;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_gm_repo" target="c_igm_repo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_gmrepo_igmrepo_label" value="&lt;i&gt;«implements»&lt;/i&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_gmrepo_igmrepo">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- AppointmentRepository -> CalendarDbContext -->
+        <mxCell id="rel_repo_db" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_appt_repo" target="c_dbcontext">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- GroupMeetingRepository -> CalendarDbContext -->
+        <mxCell id="rel_gmrepo_db" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_gm_repo" target="c_dbcontext">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== DOMAIN RELATIONSHIPS ===== -->
+
+        <!-- User 1..* - * Appointment -->
+        <mxCell id="rel_user_appt" style="endArrow=none;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_user" target="c_appointment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_user_appt_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_user_appt">
+          <mxGeometry x="-0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_appt_t" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_user_appt">
+          <mxGeometry x="0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- Appointment 1 - * Reminder -->
+        <mxCell id="rel_appt_reminder" style="endArrow=none;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_appointment" target="c_reminder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_appt_reminder_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_appt_reminder">
+          <mxGeometry x="-0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_appt_reminder_t" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_appt_reminder">
+          <mxGeometry x="0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- Appointment * - 0..1 GroupMeeting -->
+        <mxCell id="rel_appt_gm" style="endArrow=none;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_appointment" target="c_group_meeting">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_appt_gm_s" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_appt_gm">
+          <mxGeometry x="-0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_appt_gm_t" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_appt_gm">
+          <mxGeometry x="0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- GroupMeeting 1 - * Participant -->
+        <mxCell id="rel_gm_part" style="endArrow=none;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_group_meeting" target="c_participant">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_gm_part_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_gm_part">
+          <mxGeometry x="-0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_gm_part_t" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_gm_part">
+          <mxGeometry x="0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- User 1 - * Participant -->
+        <mxCell id="rel_user_part" style="endArrow=none;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_user" target="c_participant">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="140" y="1120" />
+              <mxPoint x="140" y="1220" />
+              <mxPoint x="1495" y="1220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_part_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_user_part">
+          <mxGeometry x="-0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_user_part_t" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_user_part">
+          <mxGeometry x="0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- Appointment * - 0..1 RecurrenceRule -->
+        <mxCell id="rel_appt_recurrence" style="endArrow=none;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_appointment" target="c_recurrence">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_appt_recurrence_s" value="*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_appt_recurrence">
+          <mxGeometry x="-0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_appt_recurrence_t" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" connectable="0" parent="rel_appt_recurrence">
+          <mxGeometry x="0.85" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- Reminder - ReminderType -->
+        <mxCell id="rel_reminder_type" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_reminder" target="c_reminder_type">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- RecurrenceRule - RecurrenceType -->
+        <mxCell id="rel_recurrence_enumtype" style="endArrow=open;endFill=0;dashed=1;strokeColor=#333333;fontSize=10;" edge="1" parent="1" source="c_recurrence" target="c_recurrence_type">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

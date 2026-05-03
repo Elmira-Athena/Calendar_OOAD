@@ -1,0 +1,155 @@
+@page "/calendar"
+@attribute [Authorize]
+@inject AppointmentService AppointmentService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudPaper Class="pa-4 mb-4 d-flex align-center">
+        <MudButton Variant="Variant.Outlined" OnClick="SetToday">Hôm nay</MudButton>
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick="Previous" />
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick="Next" />
+        <MudText Typo="Typo.h5" Class="ml-4 flex-grow-1">
+            @GetViewTitle()
+        </MudText>
+        
+        <MudToggleGroup T="string" @bind-Value="CurrentView" Variant="Variant.Outlined" Delimiters="true" Color="Color.Primary" SelectionMode="SelectionMode.SingleSelection">
+            <MudToggleItem Value="@("Daily")" Text="Ngày" />
+            <MudToggleItem Value="@("Weekly")" Text="Tuần" />
+            <MudToggleItem Value="@("Monthly")" Text="Tháng" />
+        </MudToggleGroup>
+        
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-4" StartIcon="@Icons.Material.Filled.Add" OnClick="() => OpenAddDialog(DateTime.Now)">Tạo cuộc hẹn</MudButton>
+    </MudPaper>
+
+    <MudPaper Class="pa-4">
+        @if (isLoading)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Class="mx-auto" />
+        }
+        else
+        {
+            @if (CurrentView == "Daily")
+            {
+                <DailyView CurrentDate="currentDate" Appointments="appointments" OnSlotClick="OpenAddDialog" OnEventClick="OpenDetailDialog" />
+            }
+            else if (CurrentView == "Weekly")
+            {
+                <WeeklyView CurrentDate="currentDate" Appointments="appointments" OnSlotClick="OpenAddDialog" OnEventClick="OpenDetailDialog" />
+            }
+            else if (CurrentView == "Monthly")
+            {
+                <MonthlyView CurrentDate="currentDate" Appointments="appointments" OnSlotClick="OpenAddDialog" OnEventClick="OpenDetailDialog" />
+            }
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private DateTime currentDate = DateTime.Today;
+    private string CurrentView { get; set; } = "Weekly";
+    private List<AppointmentListResponse> appointments = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        StateHasChanged();
+        
+        DateTime from, to;
+        if (CurrentView == "Daily")
+        {
+            from = currentDate.Date;
+            to = currentDate.Date.AddDays(1).AddSeconds(-1);
+        }
+        else if (CurrentView == "Weekly")
+        {
+            int diff = (7 + (currentDate.DayOfWeek - DayOfWeek.Monday)) % 7;
+            from = currentDate.AddDays(-1 * diff).Date;
+            to = from.AddDays(7).AddSeconds(-1);
+        }
+        else
+        {
+            from = new DateTime(currentDate.Year, currentDate.Month, 1);
+            to = from.AddMonths(1).AddSeconds(-1);
+        }
+
+        var res = await AppointmentService.GetByDateRangeAsync(from, to);
+        if (res.Success)
+        {
+            appointments = res.Data ?? new();
+        }
+        else
+        {
+            Snackbar.Add(res.Message, Severity.Error);
+        }
+        
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task Previous()
+    {
+        if (CurrentView == "Daily") currentDate = currentDate.AddDays(-1);
+        else if (CurrentView == "Weekly") currentDate = currentDate.AddDays(-7);
+        else currentDate = currentDate.AddMonths(-1);
+        await LoadData();
+    }
+
+    private async Task Next()
+    {
+        if (CurrentView == "Daily") currentDate = currentDate.AddDays(1);
+        else if (CurrentView == "Weekly") currentDate = currentDate.AddDays(7);
+        else currentDate = currentDate.AddMonths(1);
+        await LoadData();
+    }
+
+    private async Task SetToday()
+    {
+        currentDate = DateTime.Today;
+        await LoadData();
+    }
+
+    private string GetViewTitle()
+    {
+        if (CurrentView == "Daily") return currentDate.ToString("dd/MM/yyyy");
+        if (CurrentView == "Weekly")
+        {
+            int diff = (7 + (currentDate.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var start = currentDate.AddDays(-1 * diff).Date;
+            return $"{start:dd/MM} - {start.AddDays(6):dd/MM/yyyy}";
+        }
+        return currentDate.ToString("MM/yyyy");
+    }
+
+    private async Task OpenAddDialog(DateTime initialTime)
+    {
+        var parameters = new DialogParameters { ["InitialTime"] = initialTime };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<global::Calendar.Client.Components.AddAppointmentDialog>("Tạo cuộc hẹn mới", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task OpenDetailDialog(Guid appointmentId)
+    {
+        var parameters = new DialogParameters { ["AppointmentId"] = appointmentId };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<global::Calendar.Client.Components.AppointmentDetailDialog>("Chi tiết cuộc hẹn", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadData();
+        }
+    }
+}

@@ -1,0 +1,223 @@
+@inject AppointmentService AppointmentService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (appointment != null)
+        {
+            <!-- Header with name and type badge -->
+            <div class="d-flex align-center gap-2 mb-2">
+                @if (appointment.IsGroupMeeting)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Groups"
+                             Style="color: #7C3AED; font-size: 28px;" />
+                }
+                <MudText Typo="Typo.h5" Style="@($"color: {appointment.Color ?? (appointment.IsGroupMeeting ? "#7C3AED" : "#1976d2")};")">
+                    <b>@appointment.Name</b>
+                </MudText>
+                @if (appointment.IsGroupMeeting)
+                {
+                    <MudChip T="string" Size="Size.Small" Style="background: #7C3AED20; color: #7C3AED; font-weight: 600; border: 1px solid #7C3AED40;">
+                        Cuộc họp nhóm
+                    </MudChip>
+                }
+            </div>
+
+            <!-- Time -->
+            <MudText Typo="Typo.body2" Class="mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Class="mr-1" />
+                @appointment.StartTime.ToLocalTime().ToString("g") - @appointment.EndTime.ToLocalTime().ToString("g")
+                @(appointment.IsAllDay ? "(Cả ngày)" : "")
+            </MudText>
+
+            <!-- Location -->
+            @if (!string.IsNullOrEmpty(appointment.Location))
+            {
+                <MudText Typo="Typo.body1" Class="mb-2">
+                    <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="mr-1" />
+                    @appointment.Location
+                </MudText>
+            }
+
+            <!-- Description -->
+            @if (!string.IsNullOrEmpty(appointment.Description))
+            {
+                <MudText Typo="Typo.body1" Class="mt-2 mb-3 text-pre-wrap">@appointment.Description</MudText>
+            }
+
+            <!-- Creator info (only for GroupMeeting) -->
+            @if (appointment.IsGroupMeeting && !string.IsNullOrEmpty(appointment.CreatedByUserName))
+            {
+                <MudText Typo="Typo.caption" Style="color: #888;" Class="mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-1" />
+                    Tạo bởi: <b>@appointment.CreatedByUserName</b>
+                </MudText>
+            }
+
+            <!-- Participants (only for GroupMeeting) -->
+            @if (appointment.IsGroupMeeting && appointment.Participants.Any())
+            {
+                <MudDivider Class="my-3" />
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudIcon Icon="@Icons.Material.Filled.People" Style="color: #7C3AED;" />
+                    <MudText Typo="Typo.subtitle1" Style="color: #7C3AED; font-weight: 600;">
+                        Người tham dự (@appointment.Participants.Count)
+                    </MudText>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    @foreach (var p in appointment.Participants)
+                    {
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f9f4ff; border-radius: 8px;">
+                            <MudAvatar Size="Size.Small" Style="background: #7C3AED; color: white; font-size: 13px;">
+                                @(p.DisplayName.Length > 0 ? p.DisplayName[0].ToString().ToUpper() : "?")
+                            </MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.body2" Style="font-weight: 600;">@p.DisplayName</MudText>
+                                <MudText Typo="Typo.caption" Style="color: #999;">
+                                    Tham gia: @p.JoinedDate.ToLocalTime().ToString("dd/MM/yyyy")
+                                </MudText>
+                            </div>
+                            @if (p.UserId == appointment.Participants.FirstOrDefault()?.UserId && appointment.IsCurrentUserCreator)
+                            {
+                                <MudChip T="string" Size="Size.Small" Style="margin-left: auto; background: #7C3AED; color: white;">
+                                    Người tạo
+                                </MudChip>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Reminders -->
+            @if (appointment.Reminders.Any())
+            {
+                <MudDivider Class="my-3" />
+                <MudText Typo="Typo.subtitle2" Class="mb-2">Nhắc nhở:</MudText>
+                @foreach (var r in appointment.Reminders)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Surface" Variant="Variant.Outlined">
+                        @r.Type.ToString(): @r.MinutesBefore phút trước
+                    </MudChip>
+                }
+            }
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Đóng</MudButton>
+
+        @if (appointment != null && appointment.IsGroupMeeting)
+        {
+            @if (!appointment.IsCurrentUserParticipant)
+            {
+                <!-- Join button -->
+                <MudButton Color="Color.Secondary" Variant="Variant.Filled"
+                           OnClick="JoinMeetingAsync" Disabled="@isActionLoading"
+                           StartIcon="@Icons.Material.Filled.GroupAdd"
+                           Style="background: linear-gradient(135deg, #7C3AED, #5B21B6);">
+                    @if (isActionLoading) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> }
+                    else { <span>Tham gia</span> }
+                </MudButton>
+            }
+            else if (!appointment.IsCurrentUserCreator)
+            {
+                <!-- Leave button (not for creator) -->
+                <MudButton Color="Color.Error" Variant="Variant.Outlined"
+                           OnClick="LeaveMeetingAsync" Disabled="@isActionLoading"
+                           StartIcon="@Icons.Material.Filled.ExitToApp">
+                    @if (isActionLoading) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> }
+                    else { <span>Rời khỏi</span> }
+                </MudButton>
+            }
+
+            @if (appointment.IsCurrentUserCreator)
+            {
+                <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="DeleteAsync"
+                           StartIcon="@Icons.Material.Filled.Delete">
+                    Xóa cuộc họp
+                </MudButton>
+            }
+        }
+        else
+        {
+            <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="DeleteAsync">Xóa</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public Guid AppointmentId { get; set; }
+
+    private AppointmentResponse? appointment;
+    private bool isLoading = true;
+    private bool isActionLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await AppointmentService.GetByIdAsync(AppointmentId);
+        if (res.Success)
+        {
+            appointment = res.Data;
+        }
+        else
+        {
+            Snackbar.Add(res.Message, Severity.Error);
+            MudDialog.Cancel();
+        }
+        isLoading = false;
+    }
+
+    private async Task JoinMeetingAsync()
+    {
+        isActionLoading = true;
+        StateHasChanged();
+        var res = await AppointmentService.JoinMeetingAsync(AppointmentId);
+        isActionLoading = false;
+        if (res.Success)
+        {
+            Snackbar.Add("Tham gia cuộc họp nhóm thành công! 🎉", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(res.Message, Severity.Error);
+        }
+    }
+
+    private async Task LeaveMeetingAsync()
+    {
+        isActionLoading = true;
+        StateHasChanged();
+        var res = await AppointmentService.LeaveMeetingAsync(AppointmentId);
+        isActionLoading = false;
+        if (res.Success)
+        {
+            Snackbar.Add("Đã rời khỏi cuộc họp.", Severity.Info);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(res.Message, Severity.Error);
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        var res = await AppointmentService.DeleteAsync(AppointmentId);
+        if (res.Success)
+        {
+            Snackbar.Add("Đã xóa thành công", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add(res.Message, Severity.Error);
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

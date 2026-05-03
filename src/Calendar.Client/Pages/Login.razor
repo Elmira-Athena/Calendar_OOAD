@@ -1,0 +1,66 @@
+@page "/login"
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-16">
+    <MudPaper Class="pa-8">
+        <MudText Typo="Typo.h5" Class="mb-4">Đăng nhập</MudText>
+        
+        <MudForm @ref="form" Model="@request">
+            <MudTextField @bind-Value="request.Username" For="@(() => request.Username)" Label="Tên đăng nhập" Required="true" Class="mb-4"/>
+            <MudTextField @bind-Value="request.Password" For="@(() => request.Password)" Label="Mật khẩu" InputType="InputType.Password" Required="true" Class="mb-4"/>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" FullWidth="true" OnClick="Submit" Disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                    <MudText Class="ms-2">Đang xử lý...</MudText>
+                }
+                else
+                {
+                    <MudText>Đăng nhập</MudText>
+                }
+            </MudButton>
+        </MudForm>
+        
+        <MudText Class="mt-4">Chưa có tài khoản? <MudLink Href="/register">Đăng ký ngay</MudLink></MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    MudForm form;
+    LoginRequest request = new LoginRequest();
+    global::Calendar.Shared.Validators.LoginRequestValidator validator = new();
+    bool isLoading = false;
+
+    private async Task Submit()
+    {
+        var valResult = validator.Validate(request);
+        if (valResult.IsValid)
+        {
+            isLoading = true;
+            StateHasChanged();
+            
+            var result = await AuthService.LoginAsync(request);
+            
+            isLoading = false;
+            if (result.Success)
+            {
+                Snackbar.Add("Đăng nhập thành công!", Severity.Success);
+                NavigationManager.NavigateTo("/calendar");
+            }
+            else
+            {
+                Snackbar.Add(result.Message, Severity.Error);
+            }
+        }
+        else
+        {
+            foreach (var err in valResult.Errors)
+            {
+                Snackbar.Add(err.ErrorMessage, Severity.Error);
+            }
+        }
+    }
+}

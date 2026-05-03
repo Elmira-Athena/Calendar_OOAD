@@ -1,0 +1,69 @@
+@using Calendar.Shared.DTOs.Appointments
+
+<MudDialog>
+    <DialogContent>
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            Phát hiện trùng lịch!
+            <br />
+            Nếu lưu đè sẽ sinh ra xung đột. Tuy nhiên, thời gian này đã có người tham gia cuộc hẹn khác.
+            Bạn muốn cập nhật thời gian hay thay thế (hủy cuộc hẹn cũ)?
+        </MudAlert>
+
+        <MudTable Items="ConflictingAppointments" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+            <HeaderContent>
+                <MudTh>Tên</MudTh>
+                <MudTh>Bắt đầu</MudTh>
+                <MudTh>Kết thúc</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Tên">@context.Name</MudTd>
+                <MudTd DataLabel="Bắt đầu">@context.StartTime.ToString("g")</MudTd>
+                <MudTd DataLabel="Kết thúc">@context.EndTime.ToString("g")</MudTd>
+            </RowTemplate>
+        </MudTable>
+
+        <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Thời gian gợi ý:</MudText>
+        <MudChipSet T="DateTime" SelectionMode="SelectionMode.SingleSelection" @bind-SelectedValue="selectedSuggestion">
+            @foreach(var st in SuggestedTimes)
+            {
+                <MudChip Text="@st.ToString("HH:mm dd/MM/yyyy")" Value="st" Color="Color.Primary" />
+            }
+        </MudChipSet>
+        
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy bỏ</MudButton>
+        <MudButton Color="Color.Error" OnClick="Replace" Variant="Variant.Outlined">Thay thế (Xóa cái cũ)</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitSuggestion" Disabled="@(selectedSuggestion == default)">Sử dụng gợi ý</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public List<AppointmentListResponse> ConflictingAppointments { get; set; } = new();
+    [Parameter] public List<DateTime> SuggestedTimes { get; set; } = new();
+
+    private DateTime selectedSuggestion;
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void SubmitSuggestion()
+    {
+        MudDialog.Close(DialogResult.Ok(new ConflictResolution { Action = "Suggestion", SuggestedTime = selectedSuggestion }));
+    }
+
+    private void Replace()
+    {
+        MudDialog.Close(DialogResult.Ok(new ConflictResolution { Action = "Replace" }));
+    }
+
+    public class ConflictResolution
+    {
+        public string Action { get; set; } = "";
+        public DateTime? SuggestedTime { get; set; }
+    }
+}

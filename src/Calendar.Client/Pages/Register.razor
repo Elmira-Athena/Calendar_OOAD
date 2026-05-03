@@ -1,0 +1,68 @@
+@page "/register"
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-16">
+    <MudPaper Class="pa-8">
+        <MudText Typo="Typo.h5" Class="mb-4">Đăng ký tài khoản</MudText>
+        
+        <MudForm @ref="form" Model="@request">
+            <MudTextField @bind-Value="request.Username" For="@(() => request.Username)" Label="Tên đăng nhập" Required="true" Class="mb-2"/>
+            <MudTextField @bind-Value="request.Email" For="@(() => request.Email)" Label="Email" Required="true" Class="mb-2"/>
+            <MudTextField @bind-Value="request.DisplayName" For="@(() => request.DisplayName)" Label="Tên hiển thị" Class="mb-2"/>
+            <MudTextField @bind-Value="request.Password" For="@(() => request.Password)" Label="Mật khẩu" InputType="InputType.Password" Required="true" Class="mb-4"/>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" FullWidth="true" OnClick="Submit" Disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                    <MudText Class="ms-2">Đang xử lý...</MudText>
+                }
+                else
+                {
+                    <MudText>Đăng ký</MudText>
+                }
+            </MudButton>
+        </MudForm>
+        
+        <MudText Class="mt-4">Đã có tài khoản? <MudLink Href="/login">Đăng nhập</MudLink></MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    MudForm form;
+    RegisterRequest request = new RegisterRequest();
+    global::Calendar.Shared.Validators.RegisterRequestValidator validator = new();
+    bool isLoading = false;
+
+    private async Task Submit()
+    {
+        var valResult = validator.Validate(request);
+        if (valResult.IsValid)
+        {
+            isLoading = true;
+            StateHasChanged();
+            
+            var result = await AuthService.RegisterAsync(request);
+            
+            isLoading = false;
+            if (result.Success)
+            {
+                Snackbar.Add("Đăng ký thành công! Vui lòng đăng nhập.", Severity.Success);
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                Snackbar.Add(result.Message, Severity.Error);
+            }
+        }
+        else
+        {
+            foreach (var err in valResult.Errors)
+            {
+                Snackbar.Add(err.ErrorMessage, Severity.Error);
+            }
+        }
+    }
+}

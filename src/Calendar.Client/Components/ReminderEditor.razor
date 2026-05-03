@@ -1,0 +1,108 @@
+@using Calendar.Shared.DTOs.Reminders
+@using Calendar.Core.Enums
+
+<div class="mt-4">
+    <div class="d-flex justify-space-between align-center mb-3">
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.NotificationsActive" Color="Color.Primary" Class="mr-2" Size="Size.Small" />
+            <MudText Typo="Typo.subtitle1">Nhắc nhở</MudText>
+        </div>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" 
+                   Variant="Variant.Outlined" 
+                   Color="Color.Primary" 
+                   Size="Size.Small" 
+                   OnClick="AddReminder">Thêm nhắc nhở</MudButton>
+    </div>
+
+    @if (Reminders == null || Reminders.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="py-1">
+            Chưa có nhắc nhở nào được thiết lập.
+        </MudAlert>
+    }
+    else
+    {
+        <div class="reminder-list">
+            @foreach (var reminder in Reminders)
+            {
+                <MudPaper Class="pa-3 mb-2 d-flex align-center gap-3 reminder-item" Elevation="1" Outlined="true">
+                    <MudSelect @bind-Value="reminder.Type" 
+                              Label="Gửi qua" 
+                              Dense="true" 
+                              Margin="Margin.Dense" 
+                              Variant="Variant.Outlined"
+                              Style="max-width: 120px;">
+                        <MudSelectItem Value="@ReminderType.Notification">
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.DesktopWindows" Size="Size.Small" Class="mr-2"/>
+                                <span>Ứng dụng</span>
+                            </div>
+                        </MudSelectItem>
+                        <MudSelectItem Value="@ReminderType.Email">
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" Class="mr-2"/>
+                                <span>Email</span>
+                            </div>
+                        </MudSelectItem>
+                    </MudSelect>
+                    
+                    <div class="d-flex align-center flex-grow-1 gap-2">
+                        <MudNumericField @bind-Value="reminder.MinutesBefore" 
+                                        Label="Trước" 
+                                        Min="0" 
+                                        Max="10080" 
+                                        Variant="Variant.Outlined"
+                                        Margin="Margin.Dense" 
+                                        Adornment="Adornment.End" 
+                                        AdornmentText="phút"/>
+                        
+                        <MudMenu Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Color="Color.Default" AnchorOrigin="Origin.BottomCenter">
+                            <MudMenuItem OnClick="@(() => SetTime(reminder, 5))">5 phút</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => SetTime(reminder, 15))">15 phút</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => SetTime(reminder, 30))">30 phút</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => SetTime(reminder, 60))">1 giờ</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => SetTime(reminder, 1440))">1 ngày</MudMenuItem>
+                        </MudMenu>
+                    </div>
+                    
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                  Color="Color.Error" 
+                                  Size="Size.Small" 
+                                  OnClick="@(() => RemoveReminder(reminder))"
+                                  Class="flex-none"/>
+                </MudPaper>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .reminder-item {
+        background-color: var(--mud-palette-background-grey);
+        transition: all 0.2s;
+    }
+    .reminder-item:hover {
+        border-color: var(--mud-palette-primary);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+
+@code {
+    [Parameter] public List<ReminderDto> Reminders { get; set; } = new();
+
+    private void AddReminder()
+    {
+        Reminders.Add(new ReminderDto { MinutesBefore = 15, Type = ReminderType.Notification });
+    }
+
+    private void RemoveReminder(ReminderDto reminder)
+    {
+        Reminders.Remove(reminder);
+    }
+
+    private void SetTime(ReminderDto reminder, int minutes)
+    {
+        reminder.MinutesBefore = minutes;
+        StateHasChanged();
+    }
+}

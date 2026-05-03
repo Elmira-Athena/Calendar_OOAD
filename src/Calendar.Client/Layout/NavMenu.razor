@@ -1,0 +1,12 @@
+<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Trang chủ</MudNavLink>
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="/calendar" Icon="@Icons.Material.Filled.CalendarMonth">Lịch của tôi</MudNavLink>
+        </Authorized>
+        <NotAuthorized>
+            <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">Đăng nhập</MudNavLink>
+            <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">Đăng ký</MudNavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudNavMenu>
