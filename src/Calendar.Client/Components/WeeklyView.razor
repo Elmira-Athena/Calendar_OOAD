@@ -87,10 +87,15 @@
 
             <div @onclick="() => SlotClicked(dayDate)" class="day-column-content" 
                  style="background-color: @(isToday ? "rgba(25, 118, 210, 0.02)" : "transparent");">
-                @foreach (var appt in Appointments.Where(a => a.StartTime.Date == dayDate.Date && !a.IsAllDay))
+                @foreach (var appt in Appointments.Where(a => a.StartTime.Date <= dayDate.Date && a.EndTime.Date >= dayDate.Date && !a.IsAllDay))
                 {
-                    var top = appt.StartTime.Hour * 60 + appt.StartTime.Minute;
-                    var height = (appt.EndTime - appt.StartTime).TotalMinutes;
+                    var dayStart = dayDate.Date;
+                    var dayEnd = dayStart.AddDays(1);
+                    var displayStart = appt.StartTime < dayStart ? dayStart : appt.StartTime;
+                    var displayEnd = appt.EndTime > dayEnd ? dayEnd : appt.EndTime;
+
+                    var top = (displayStart - dayStart).TotalMinutes;
+                    var height = (displayEnd - displayStart).TotalMinutes;
                     if (height < 15) height = 15;
 
                     @if (appt.IsGroupMeeting)

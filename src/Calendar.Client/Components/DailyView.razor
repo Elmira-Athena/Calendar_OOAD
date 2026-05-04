@@ -78,10 +78,15 @@
         </div>
 
         <div @onclick="() => OnSlotClick.InvokeAsync(CurrentDate.AddHours(9))" class="day-column-content">
-            @foreach (var appt in Appointments.Where(a => a.StartTime.Date == CurrentDate.Date && !a.IsAllDay))
+            @foreach (var appt in Appointments.Where(a => a.StartTime.Date <= CurrentDate.Date && a.EndTime.Date >= CurrentDate.Date && !a.IsAllDay))
             {
-                var top = appt.StartTime.Hour * 60 + appt.StartTime.Minute;
-                var height = (appt.EndTime - appt.StartTime).TotalMinutes;
+                var dayStart = CurrentDate.Date;
+                var dayEnd = dayStart.AddDays(1);
+                var displayStart = appt.StartTime < dayStart ? dayStart : appt.StartTime;
+                var displayEnd = appt.EndTime > dayEnd ? dayEnd : appt.EndTime;
+
+                var top = (displayStart - dayStart).TotalMinutes;
+                var height = (displayEnd - displayStart).TotalMinutes;
                 if (height < 20) height = 20;
 
                 @if (appt.IsGroupMeeting)

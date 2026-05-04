@@ -21,7 +21,7 @@
                     @day.Day
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                    @foreach (var appt in Appointments.Where(a => a.StartTime.Date == day.Date))
+                    @foreach (var appt in Appointments.Where(a => a.StartTime.Date <= day.Date && a.EndTime.Date >= day.Date))
                     {
                         @if (appt.IsGroupMeeting)
                         {
