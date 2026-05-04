@@ -33,7 +33,7 @@
                                         display: flex; align-items: center; gap: 3px;">
                                 <span>👥</span>
                                 <span style="overflow: hidden; text-overflow: ellipsis;">
-                                    @appt.StartTime.ToString("HH:mm") @appt.Name
+                                    @(!appt.IsAllDay ? appt.StartTime.ToString("HH:mm") + " " : "")@appt.Name
                                 </span>
                                 @if (appt.IsCurrentUserParticipant)
                                 {
@@ -46,8 +46,11 @@
                             <div @onclick:stopPropagation="true" @onclick="() => OnEventClick.InvokeAsync(appt.Id)"
                                  style="background: @(appt.Color ?? "#1976d2"); color: white; padding: 2px 6px;
                                         border-radius: 3px; font-size: 11px; white-space: nowrap;
-                                        overflow: hidden; text-overflow: ellipsis; cursor: pointer;">
-                                @appt.StartTime.ToString("HH:mm") @appt.Name
+                                        overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+                                        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                                        border-left: 3px solid rgba(0,0,0,0.2);
+                                        font-weight: @(appt.IsAllDay ? "bold" : "normal");">
+                                @(!appt.IsAllDay ? appt.StartTime.ToString("HH:mm") + " " : "")@appt.Name
                             </div>
                         }
                     }

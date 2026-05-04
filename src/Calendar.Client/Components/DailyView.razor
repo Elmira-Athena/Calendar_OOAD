@@ -29,11 +29,29 @@
         background-image: linear-gradient(#eee 1px, transparent 1px);
         background-size: 100% 60px;
     }
+    .all-day-appt {
+        color: white;
+        border-radius: 4px;
+        padding: 6px 12px;
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid rgba(0,0,0,0.2);
+        margin: 2px 8px;
+    }
+    .all-day-appt.group {
+        background: linear-gradient(135deg, #7C3AED, #5B21B6);
+        border: 2px dashed rgba(255,255,255,0.4);
+    }
 </style>
 
 <div class="daily-grid">
     <div class="time-column" style="border-right: 1px solid #ddd; background: #fafafa;">
         <div style="height: 40px; border-bottom: 1px solid #ddd;"></div>
+        <div style="height: auto; min-height: 40px; border-bottom: 1px solid #ddd; font-size: 11px; color: #999; display: flex; align-items: center; justify-content: center;">Cả ngày</div>
         @for (int i = 0; i < 24; i++)
         {
             <div class="time-slot">
@@ -45,6 +63,18 @@
     <div class="day-column" style="position: relative;">
         <div style="height: 40px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; padding-top: 8px; background: #f5f5f5;">
             @CurrentDate.ToString("dddd, dd/MM/yyyy")
+        </div>
+
+        <div class="all-day-container" style="min-height: 40px; border-bottom: 1px solid #ddd; display: flex; flex-direction: column; background: #fafafa; padding: 2px 0;">
+            @foreach (var appt in Appointments.Where(a => a.StartTime.Date <= CurrentDate.Date && a.EndTime.Date >= CurrentDate.Date && a.IsAllDay))
+            {
+                <div @onclick:stopPropagation="true" @onclick="() => OnEventClick.InvokeAsync(appt.Id)"
+                     class="all-day-appt @(appt.IsGroupMeeting ? "group" : "")"
+                     style="background-color: @(appt.IsGroupMeeting ? "" : (appt.Color ?? "#1976d2"));">
+                    @if (appt.IsGroupMeeting) { <span style="margin-right: 6px;">👥</span> }
+                    <b>@appt.Name</b> (Cả ngày)
+                </div>
+            }
         </div>
 
         <div @onclick="() => OnSlotClick.InvokeAsync(CurrentDate.AddHours(9))" class="day-column-content">

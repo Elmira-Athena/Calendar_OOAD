@@ -13,7 +13,7 @@
             @GetViewTitle()
         </MudText>
         
-        <MudToggleGroup T="string" @bind-Value="CurrentView" Variant="Variant.Outlined" Delimiters="true" Color="Color.Primary" SelectionMode="SelectionMode.SingleSelection">
+        <MudToggleGroup T="string" Value="CurrentView" ValueChanged="OnViewChanged" Variant="Variant.Outlined" Delimiters="true" Color="Color.Primary" SelectionMode="SelectionMode.SingleSelection">
             <MudToggleItem Value="@("Daily")" Text="Ngày" />
             <MudToggleItem Value="@("Weekly")" Text="Tuần" />
             <MudToggleItem Value="@("Monthly")" Text="Tháng" />
@@ -106,6 +106,12 @@
         if (CurrentView == "Daily") currentDate = currentDate.AddDays(1);
         else if (CurrentView == "Weekly") currentDate = currentDate.AddDays(7);
         else currentDate = currentDate.AddMonths(1);
+        await LoadData();
+    }
+
+    private async Task OnViewChanged(string view)
+    {
+        CurrentView = view;
         await LoadData();
     }
 
